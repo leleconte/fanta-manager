@@ -1,0 +1,2 @@
+function createTeam(userId,leagueId,{name,abbr,logo}){const d=loadData();const l=d.leagues.find(x=>x.id===leagueId);if(!l)throw new Error('Lega non trovata.');let t=d.teams.find(x=>x.ownerId===userId&&x.leagueId===leagueId);if(t){Object.assign(t,{name,abbr,logo});}else{t={id:uid('tm'),leagueId,ownerId:userId,name,abbr,logo:logo||'',credits:l.initialCredits,spent:0,players:[],createdAt:Date.now()};d.teams.push(t);}saveData(d);return t;}
+function teamFor(userId,leagueId){return currentTeam(userId,leagueId)}

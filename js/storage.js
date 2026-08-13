@@ -19,7 +19,9 @@ function loadData(){
       users: Array.isArray(parsed.users) ? parsed.users : [],
       leagues: Array.isArray(parsed.leagues) ? parsed.leagues : [],
       teams: Array.isArray(parsed.teams) ? parsed.teams : [],
-      players: Array.isArray(parsed.players) ? parsed.players : [],
+      players: Array.isArray(parsed.players)
+        ? parsed.players.map(p => ({ ...p, available: p.available !== false }))
+        : [],
       auctions: Array.isArray(parsed.auctions) ? parsed.auctions : [],
       bids: Array.isArray(parsed.bids) ? parsed.bids : [],
       rosters: Array.isArray(parsed.rosters) ? parsed.rosters : [],

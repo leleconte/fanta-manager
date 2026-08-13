@@ -32,7 +32,7 @@ function startAuction(leagueId, playerId, starterTeamId) {
     const player = data.players.find(x => x.id === playerId);
     if (!league) throw new Error('Lega non trovata.');
     if (!player) throw new Error('Giocatore non trovato.');
-    if (!player.available) throw new Error('Questo giocatore è già stato acquistato.');
+    if (player.available === false) throw new Error('Questo giocatore è già stato acquistato.');
     if (!starterTeamId) throw new Error('Crea prima la tua squadra.');
     data.auctions.push({
       id: uid('auc'),
@@ -212,16 +212,21 @@ async function initAuctionPage() {
   const players = await loadPlayers();
   const select = document.querySelector('[data-player-select]');
   if (select) {
-    const available = players.filter(p => p.available);
+    const available = players.filter(p => p.available !== false);
     select.innerHTML = available.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} — ${escapeHtml(p.team)} · ${escapeHtml(p.role)}</option>`).join('') || '<option value="">Nessun giocatore disponibile</option>';
   }
 
   document.querySelector('[data-start]')?.addEventListener('click', () => {
+    const messageEl=document.querySelector('[data-auction-message]');
     try {
       if (!select?.value) throw new Error('Seleziona un giocatore prima di iniziare.');
       startAuction(ctx.league.id, select.value, ctx.team.id);
+      if(messageEl){messageEl.textContent='Asta avviata correttamente.';messageEl.className='auction-message success';}
       renderAuction();
-    } catch (error) { alert(error.message || 'Impossibile avviare l’asta.'); }
+    } catch (error) {
+      if(messageEl){messageEl.textContent=error.message || 'Impossibile avviare l’asta.';messageEl.className='auction-message error';}
+      console.error(error);
+    }
   });
 
   document.querySelectorAll('[data-bid]').forEach(button => button.addEventListener('click', () => {
@@ -267,7 +272,7 @@ async function refreshPlayerOptions(leagueId) {
   const active = getActiveAuction(leagueId);
   if (active) return;
   const currentValue = select.value;
-  const available = players.filter(p => p.available);
+  const available = players.filter(p => p.available !== false);
   select.innerHTML = available.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)} — ${escapeHtml(p.team)} · ${escapeHtml(p.role)}</option>`).join('') || '<option value="">Nessun giocatore disponibile</option>';
   if (available.some(p => p.id === currentValue)) select.value = currentValue;
 }

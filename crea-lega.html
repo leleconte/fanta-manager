@@ -1,1 +1,23 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Crea lega</title><link rel="stylesheet" href="css/style.css"></head><body><div data-shell><main class="page narrow"><div class="section-head"><div><p class="eyebrow">NUOVA COMPETIZIONE</p><h1>Crea una lega</h1></div></div><form id="form" class="panel form-grid"><label>Nome lega<input id="name" required placeholder="L-Store Champions"></label><label>Logo lega<input id="logo" type="file" accept="image/*"></label><label>Partecipanti max<input id="max" type="number" min="2" value="8"></label><label>Crediti iniziali<input id="credits" type="number" min="50" value="500"></label><label>Durata timer asta<select id="timer"><option>10</option><option>20</option><option selected>30</option><option>45</option><option>60</option></select></label><label class="span-2">Regole base<textarea id="rules">Asta al rialzo. Ogni rilancio resetta il timer.</textarea></label><div id="error" class="form-error span-2"></div><button class="btn primary span-2">CREA LEGA</button></form></main></div><script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/lega.js"></script><script src="js/app.js"></script><script>form.onsubmit=async e=>{e.preventDefault();const u=requireAuth();let img='';if(logo.files[0])img=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(logo.files[0])});try{const l=createLeague(u.id,{name:name.value,logo:img,maxParticipants:max.value,credits:credits.value,timer:timer.value,rules:rules.value});localStorage.setItem('lstore_current_league',l.id);location.href='crea-squadra.html'}catch(x){error.textContent=x.message}};</script></body></html>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Crea lega</title><link rel="stylesheet" href="css/style.css"></head><body><div data-shell><main class="page narrow"><div class="section-head"><div><p class="eyebrow">NUOVA COMPETIZIONE</p><h1>Crea una lega</h1><p class="muted">Configura la tua asta e genera subito un codice privato per i partecipanti.</p></div></div><form id="leagueForm" class="panel form-grid"><label>Nome lega<input id="leagueName" required placeholder="L-Store Champions"></label><label>Logo lega<input id="leagueLogo" type="file" accept="image/*"></label><label>Partecipanti max<input id="leagueMax" type="number" min="2" value="8" required></label><label>Crediti iniziali<input id="leagueCredits" type="number" min="50" value="500" required></label><label>Durata timer asta<select id="leagueTimer"><option value="10">10 secondi</option><option value="20">20 secondi</option><option value="30" selected>30 secondi</option><option value="45">45 secondi</option><option value="60">60 secondi</option></select></label><label class="span-2">Regole base<textarea id="leagueRules">Asta al rialzo. Ogni rilancio resetta il timer.</textarea></label><div class="form-note span-2">Il logo e i dati della lega vengono salvati esclusivamente nel browser. Il codice lega viene generato automaticamente.</div><div id="leagueError" class="form-error span-2" aria-live="polite"></div><button class="btn primary span-2" type="submit">CREA LEGA</button></form></main></div><script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/lega.js"></script><script src="js/app.js"></script><script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const form=document.getElementById('leagueForm');
+  const error=document.getElementById('leagueError');
+  form.addEventListener('submit',async(event)=>{
+    event.preventDefault(); error.textContent='';
+    const user=requireAuth(); if(!user)return;
+    const name=document.getElementById('leagueName').value.trim();
+    const max=document.getElementById('leagueMax').value;
+    const credits=document.getElementById('leagueCredits').value;
+    const timer=document.getElementById('leagueTimer').value;
+    const rules=document.getElementById('leagueRules').value.trim();
+    let logo='';
+    const file=document.getElementById('leagueLogo').files?.[0];
+    if(file){logo=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Impossibile leggere il logo.'));reader.readAsDataURL(file)}).catch(()=>{throw new Error('Impossibile leggere il logo.')});}
+    try{
+      const league=createLeague(user.id,{name,logo,maxParticipants:max,credits,timer,rules});
+      localStorage.setItem('lstore_current_league',league.id);
+      location.href='crea-squadra.html';
+    }catch(err){error.textContent=err.message||'Impossibile creare la lega.';}
+  });
+});
+</script></body></html>

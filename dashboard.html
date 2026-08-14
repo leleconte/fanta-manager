@@ -1,1 +1,18 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Dashboard</title><link rel="stylesheet" href="css/style.css?v=20260814"></head><body><div data-shell><main class="page"><div class="dashboard-hero panel"><div><p class="eyebrow">CENTRAL COMMAND</p><h1>LA MIA SQUADRA</h1><div class="team-title" data-team-name>—</div><p class="muted" data-league>—</p></div><div class="league-code"><span>CODICE LEGA</span><strong data-code>—</strong></div></div><section class="stats-grid"><div class="stat-card"><span>CREDITI DISPONIBILI</span><strong data-credits>0</strong><em>CR</em></div><div class="stat-card"><span>CREDITI SPESI</span><strong data-spent>0</strong><em>CR</em></div><div class="stat-card"><span>GIOCATORI IN ROSA</span><strong data-count>0</strong><em>/ 25</em></div><div class="stat-card hot"><span>PROSSIMO TURNO</span><strong>ASTA</strong><em>LIVE</em></div></section><section class="panel"><div class="section-head"><div><p class="eyebrow">ROSTER</p><h2>Rosa attuale</h2></div><a class="btn small" href="mia-rosa.html">VAI ALLA ROSA</a></div><div data-roster></div></section></main></div><script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/app.js"></script><script src="js/dashboard.js"></script></body></html>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Dashboard</title><link rel="stylesheet" href="css/style.css?v=20260814b"><link rel="stylesheet" href="css/dashboard.css?v=20260814b"><link rel="stylesheet" href="css/responsive.css?v=20260814b"></head><body><div data-shell><main class="page dashboard-page">
+<section class="dashboard-hero panel">
+  <div class="dash-copy"><p class="eyebrow">CONTROL ROOM</p><h1>LA TUA SQUADRA</h1><div class="team-title" data-team-name>—</div><p class="muted" data-league>—</p><div class="hero-actions-inline"><a class="btn primary" href="asta.html">APRI ASTA <span>↗</span></a><a class="btn ghost" href="mia-rosa.html">VEDI ROSA</a></div></div>
+  <div class="dash-code"><span>CODICE LEGA</span><strong data-code>—</strong><small>Condividilo con i partecipanti</small></div>
+</section>
+<section class="stats-grid">
+  <div class="stat-card stat-cyan"><span>CREDITI DISPONIBILI</span><strong data-credits>0</strong><em>CR</em><div class="stat-glow"></div></div>
+  <div class="stat-card stat-violet"><span>CREDITI SPESI</span><strong data-spent>0</strong><em>CR</em><div class="stat-glow"></div></div>
+  <div class="stat-card stat-pink"><span>GIOCATORI IN ROSA</span><strong data-count>0</strong><em>/ 25</em><div class="stat-glow"></div></div>
+  <div class="stat-card stat-gold"><span>STATO ASTA</span><strong>PRONTA</strong><em>ENTRA QUANDO VUOI</em><div class="stat-glow"></div></div>
+</section>
+<section class="quick-grid">
+  <a class="quick-card quick-cyan" href="asta.html"><div class="quick-icon">⚡</div><div><strong>Gestisci asta</strong><span>Rilanci, timer e acquisti</span></div><b>→</b></a>
+  <a class="quick-card quick-violet" href="giocatori.html"><div class="quick-icon">◉</div><div><strong>Esplora giocatori</strong><span>Ricerca e disponibilità</span></div><b>→</b></a>
+  <a class="quick-card quick-pink" href="tutte-rose.html"><div class="quick-icon">◎</div><div><strong>Tutte le rose</strong><span>Confronta le squadre</span></div><b>→</b></a>
+</section>
+<section class="panel roster-panel"><div class="section-head"><div><p class="eyebrow">ROSTER LIVE</p><h2>La tua rosa</h2></div><a class="btn small" href="mia-rosa.html">APRI ROSA</a></div><div data-roster></div></section>
+</main></div><script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/app.js"></script><script src="js/dashboard.js"></script></body></html>

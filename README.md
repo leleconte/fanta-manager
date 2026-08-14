@@ -27,3 +27,5 @@ Il progetto è volutamente frontend-only. Le credenziali vengono trasformate loc
 - Avvio asta reso robusto anche con dati giocatori già presenti in localStorage.
 - Layout contenuto e responsive hardening su tutte le pagine.
 - Feedback inline per errori/successo di avvio asta.
+
+Design refresh: landing page cleaned, dashboard redesigned, global responsive/animation pass added.

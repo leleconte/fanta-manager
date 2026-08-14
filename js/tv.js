@@ -1,1 +1,89 @@
-document.addEventListener('DOMContentLoaded',()=>{const user=requireAuth();if(!user)return;const league=currentLeague(user.id);if(!league)return;const render=()=>{const d=loadData(),a=getActiveAuction(league.id),p=a?d.players.find(x=>x.id===a.playerId):null,t=d.teams.filter(x=>x.leagueId===league.id);document.querySelector('[data-tv-name]').textContent=p?.name||'NESSUN GIOCATORE';document.querySelector('[data-tv-team]').textContent=p?`${p.team} · ${p.role}`:'ASTA PRONTA';document.querySelector('[data-tv-price]').textContent=a?.currentPrice??0;document.querySelector('[data-tv-bidder]').textContent=a?.bestTeamId?t.find(x=>x.id===a.bestTeamId)?.name||'—':'NESSUNA OFFERTA';document.querySelector('[data-tv-timer]').textContent=a?Math.max(0,Math.ceil((a.endsAt-Date.now())/1000)):'—';document.querySelector('[data-tv-teams]').innerHTML=t.map(x=>`<div class="tv-team"><span class="team-mark">${x.abbr}</span><strong>${escapeHtml(x.name)}</strong><b>${x.credits}</b></div>`).join('');document.querySelector('[data-tv-history]').innerHTML=(a?.history||[]).slice(-6).reverse().map(h=>{const tm=t.find(x=>x.id===h.teamId);return `<span>${escapeHtml(tm?.name||'')} · ${h.amount} CR</span>`}).join('');};render();setInterval(render,500);document.querySelector('[data-fullscreen]').addEventListener('click',()=>document.documentElement.requestFullscreen?.());document.querySelector('[data-view]').addEventListener('click',e=>{document.body.classList.toggle('tv-view-only');e.currentTarget.textContent=document.body.classList.contains('tv-view-only')?'MODALITÀ CONTROLLO':'SOLO VISUALIZZAZIONE';});});
+function tvRender() {
+  const user = requireAuth();
+  if (!user) return;
+  const league = currentLeague(user.id);
+  if (!league) return;
+  const data = loadData();
+  const auction = getActiveAuction(league.id);
+  const player = auction ? data.players.find(x => x.id === auction.playerId) : null;
+  const teams = data.teams.filter(x => x.leagueId === league.id);
+
+  const name = document.querySelector('[data-tv-name]');
+  const meta = document.querySelector('[data-tv-team]');
+  const price = document.querySelector('[data-tv-price]');
+  const bidder = document.querySelector('[data-tv-bidder]');
+  const timer = document.querySelector('[data-tv-timer]');
+  const teamList = document.querySelector('[data-tv-teams]');
+  const history = document.querySelector('[data-tv-history]');
+
+  if (name) name.textContent = player?.name || 'NESSUN GIOCATORE';
+  if (meta) meta.textContent = player ? `${player.team} · ${player.role}` : 'ASTA PRONTA';
+  if (price) price.textContent = String(auction?.currentPrice ?? 0);
+  if (bidder) bidder.textContent = auction?.bestTeamId ? (teams.find(x => x.id === auction.bestTeamId)?.name || '—') : 'NESSUNA OFFERTA';
+  if (timer) timer.textContent = auction ? Math.max(0, Math.ceil((Number(auction.endsAt) - Date.now()) / 1000)).toString().padStart(2, '0') : '—';
+  if (teamList) teamList.innerHTML = teams.map(x => `<div class="tv-team ${auction?.bestTeamId === x.id ? 'is-leading' : ''}"><span class="team-mark">${escapeHtml(x.abbr || String(x.name || '').slice(0,3).toUpperCase())}</span><strong>${escapeHtml(x.name)}</strong><b>${Number(x.credits || 0)}</b></div>`).join('') || '<div class="empty">Nessuna squadra.</div>';
+  if (history) history.innerHTML = (auction?.history || []).slice(-6).reverse().map(h => {
+    const tm = teams.find(x => x.id === h.teamId);
+    return `<span>${escapeHtml(tm?.name || 'Squadra')} · ${Number(h.amount || 0)} CR</span>`;
+  }).join('') || '—';
+}
+
+function tvSetFullscreen() {
+  const root = document.documentElement;
+  const request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+      return Promise.resolve(exit ? exit.call(document) : undefined);
+    }
+    if (!request) throw new Error('Il browser non supporta la modalità schermo intero.');
+    const result = request.call(root);
+    return Promise.resolve(result).catch(() => { throw new Error('Il browser ha bloccato lo schermo intero. Premi di nuovo il pulsante.'); });
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+function tvUpdateFullscreenLabel() {
+  const button = document.querySelector('[data-fullscreen]');
+  if (!button) return;
+  const active = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  button.textContent = active ? 'ESCI DA SCHERMO INTERO' : 'SCHERMO INTERO';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = requireAuth();
+  if (!user) return;
+  const league = currentLeague(user.id);
+  if (!league) { location.href = 'scelta-lega.html'; return; }
+
+  tvRender();
+  setInterval(tvRender, 500);
+
+  const viewButton = document.querySelector('[data-view]');
+  if (viewButton) {
+    viewButton.addEventListener('click', () => {
+      const active = document.body.classList.toggle('tv-view-only');
+      viewButton.textContent = active ? 'MODALITÀ CONTROLLO' : 'SOLO VISUALIZZAZIONE';
+      viewButton.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  const fullscreenButton = document.querySelector('[data-fullscreen]');
+  if (fullscreenButton) {
+    fullscreenButton.addEventListener('click', async () => {
+      try {
+        await tvSetFullscreen();
+        tvUpdateFullscreenLabel();
+      } catch (error) {
+        fullscreenButton.textContent = 'RIPROVA SCHERMO INTERO';
+        fullscreenButton.title = error.message || 'Schermo intero non disponibile';
+      }
+    });
+  }
+
+  ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(eventName => {
+    document.addEventListener(eventName, tvUpdateFullscreenLabel);
+  });
+  tvUpdateFullscreenLabel();
+});

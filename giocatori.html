@@ -1,1 +1,40 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Giocatori</title><link rel="stylesheet" href="css/style.css?v=20260814b"><link rel="stylesheet" href="css/responsive.css?v=20260814b"></head><body><div data-shell><main class="page"><div class="section-head"><div><p class="eyebrow">SERIE A DATABASE</p><h1>GIOCATORI</h1></div><button class="btn" data-refresh>AGGIORNA GIOCATORI</button></div><div class="filters panel"><input id="q" placeholder="Cerca giocatore o squadra"><select id="role"><option value="">Tutti i ruoli</option><option value="POR">Portieri</option><option value="DIF">Difensori</option><option value="CEN">Centrocampisti</option><option value="ATT">Attaccanti</option></select><select id="club"><option value="">Tutte le squadre</option></select><select id="status"><option value="all">Tutti</option><option value="available">Disponibili</option><option value="acquired">Acquistati</option></select></div><div id="players" class="player-grid"></div></main></div><script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/giocatori.js"></script><script src="js/app.js"></script><script>document.addEventListener('DOMContentLoaded',async()=>{requireAuth();const ps=await loadPlayers();[...new Set(ps.map(p=>p.team))].sort().forEach(c=>club.insertAdjacentHTML('beforeend',`<option>${escapeHtml(c)}</option>`));const render=()=>{const out=filterPlayers(ps,{q:q.value,role:role.value,club:club.value,status:status.value});players.innerHTML=out.map(p=>`<article class="player-card detailed"><div class="avatar">⚽</div><div><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.team)} · ${p.role}</span></div><b class="availability ${p.available?'ok':'off'}">${p.available?'DISPONIBILE':'ACQUISTATO'}</b><small>${p.available?'':'PREZZO: '+(p.price||'—')}</small></article>`).join('')||'<div class="empty">Nessun risultato.</div>'};[q,role,club,status].forEach(x=>x.oninput=render);dataRefreshHandler=()=>loadPlayers().then(render);document.querySelector('[data-refresh]').onclick=dataRefreshHandler;render();});</script></body></html>
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Giocatori</title><link rel="stylesheet" href="css/style.css?v=20260816a"><link rel="stylesheet" href="css/responsive.css?v=20260816a"></head>
+<body><div data-shell><main class="page"><div class="section-head"><div><p class="eyebrow">SERIE A DATABASE</p><h1>GIOCATORI</h1><p class="muted" data-player-db-status>Caricamento database…</p></div><button class="btn" data-refresh>AGGIORNA GIOCATORI</button></div>
+<div class="filters panel"><div class="catalog-search" data-catalog-search><button class="catalog-search-trigger" type="button" data-catalog-search-trigger aria-label="Apri ricerca">⌕</button><div class="catalog-search-shell"><span>⌕</span><input id="q" type="search" placeholder="Cerca giocatore, squadra o ruolo" autocomplete="off"><button class="search-reset" type="button" data-q-clear aria-label="Cancella">×</button></div></div><select id="role"><option value="">Tutti i ruoli</option><option value="POR">Portieri</option><option value="DIF">Difensori</option><option value="CEN">Centrocampisti</option><option value="ATT">Attaccanti</option></select><select id="club"><option value="">Tutte le squadre</option></select><select id="status"><option value="all">Tutti</option><option value="available">Disponibili</option><option value="acquired">Acquistati</option></select></div><div id="players" class="player-grid"></div></main></div>
+<script src="js/storage.js?v=20260816a"></script><script src="js/auth.js?v=20260816a"></script><script src="js/giocatori.js?v=20260816a"></script><script src="js/app.js?v=20260816a"></script>
+<script>
+document.addEventListener('DOMContentLoaded',async()=>{
+  const user=requireAuth(); if(!user)return;
+  const league=currentLeague(user.id); if(!league){location.href='scelta-lega.html';return;}
+  const q=document.getElementById('q'),role=document.getElementById('role'),club=document.getElementById('club'),status=document.getElementById('status'),wrap=document.getElementById('players'),dbStatus=document.querySelector('[data-player-db-status]'),refresh=document.querySelector('[data-refresh]');
+  let ps=[];
+  const refillClubs=()=>{const old=club.value;club.innerHTML='<option value="">Tutte le squadre</option>';[...new Set(ps.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'it')).forEach(c=>club.insertAdjacentHTML('beforeend',`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`));if([...club.options].some(o=>o.value===old))club.value=old;};
+  const render=()=>{const data=loadData();const view=playersForLeague(ps,league.id,data);const out=filterPlayers(view,{q:q.value,role:role.value,club:club.value,status:status.value});wrap.innerHTML=out.map(p=>`<article class="player-card detailed"><div class="avatar">⚽</div><div><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.team)} · ${escapeHtml(p.position||p.role)}</span></div><b class="availability ${p.available?'ok':'off'}">${p.available?'DISPONIBILE':'ACQUISTATO'}</b><small>${p.available?'':`${Number(p.price||0)} CR · ${escapeHtml(p.acquiredBy||'')}`}</small></article>`).join('')||'<div class="empty">Nessun risultato.</div>';};
+  const apply=()=>{refillClubs();render();};
+  const label=()=>{const meta=loadData().playerCatalogMeta||{};dbStatus.textContent=`${ps.length} giocatori · Serie A ${meta.season||'2026/27'}${meta.updatedAt?' · aggiornato '+new Date(meta.updatedAt).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):' · cache locale'}`;};
+  const load=async(force=false)=>{
+    if(!force){
+      try{ps=await loadPlayers({forceRefresh:false,refreshIfStale:false});apply();label();}catch(_){ps=loadData().players||[];apply();}
+      const meta=loadData().playerCatalogMeta||{},updated=Number(meta.updatedAt)||Date.parse(meta.updatedAt||'')||0,stale=Number(meta.version)!==3||!updated||(Date.now()-updated)>PLAYER_CATALOG_MAX_AGE||ps.length<100;
+      if(!stale)return;
+      dbStatus.textContent=`${ps.length} giocatori in cache · aggiornamento in background…`;
+      loadPlayers({forceRefresh:true,onProgress:({completed,total,count})=>dbStatus.textContent=`Aggiornamento ${completed}/${total} · ${count} giocatori`}).then(players=>{ps=players;apply();label();}).catch(()=>{dbStatus.textContent=`${ps.length} giocatori in cache · aggiornamento online non riuscito`;});
+      return;
+    }
+    refresh.disabled=true;dbStatus.textContent='Aggiornamento rose in corso…';
+    try{ps=await loadPlayers({forceRefresh:true,onProgress:({completed,total,count})=>dbStatus.textContent=`Aggiornamento ${completed}/${total} · ${count} giocatori`});apply();label();}
+    catch(err){ps=loadData().players||ps;apply();dbStatus.textContent='Aggiornamento non riuscito · uso cache locale';}
+    finally{refresh.disabled=false;}
+  };
+  [q,role,club,status].forEach(x=>x.addEventListener('input',render));
+  const catalogSearch=document.querySelector('[data-catalog-search]'),catalogTrigger=document.querySelector('[data-catalog-search-trigger]');
+  catalogTrigger.addEventListener('click',()=>{catalogSearch.classList.add('is-open');requestAnimationFrame(()=>q.focus());});
+  q.addEventListener('focus',()=>catalogSearch.classList.add('is-open'));
+  document.querySelector('[data-q-clear]').addEventListener('click',()=>{q.value='';render();catalogSearch.classList.remove('is-open');catalogTrigger.focus();});
+  document.addEventListener('click',event=>{if(!event.target.closest('[data-catalog-search]')&&!q.value.trim())catalogSearch.classList.remove('is-open');});
+  refresh.addEventListener('click',()=>load(true));
+  window.addEventListener('app:update',render);
+  await load(false);
+});
+</script></body></html>

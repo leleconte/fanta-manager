@@ -16,7 +16,7 @@ async function registerUser(name,email,password,confirm){
   if(firstPassword!==secondPassword) throw new Error('Le password non coincidono.');
   const d=loadData();
   if(d.users.some(u=>normalizeEmail(u.email)===cleanEmail)) throw new Error('Email già registrata.');
-  const user={id:uid('usr'),name:cleanName,email:cleanEmail,passwordHash:await hashPassword(firstPassword),avatar:''};
+  const user={id:uid('usr'),name:cleanName,email:cleanEmail,passwordHash:await hashPassword(firstPassword),avatar:'',createdAt:Date.now()};
   d.users.push(user); saveData(d); setSession({userId:user.id}); return user;
 }
 async function loginUser(email,password){
@@ -29,8 +29,27 @@ async function loginUser(email,password){
 function logout(){clearSession();location.href='iniziale.html';}
 function requireAuth(){
   const s=getSession(); if(!s){location.href='login.html';return null;}
-  const u=loadData().users.find(x=>x.id===s.userId);
+  const u=loadData().users.find(x=>sameId(x.id,s.userId));
   if(!u){clearSession();location.href='login.html';return null;} return u;
 }
-function currentLeague(userId){return loadData().leagues.find(l=>l.members.includes(userId))||null;}
-function currentTeam(userId,leagueId){return loadData().teams.find(t=>t.ownerId===userId&&t.leagueId===leagueId)||null;}
+function leaguesForUser(userId){
+  return loadData().leagues.filter(l => Array.isArray(l.members) && l.members.some(id => sameId(id,userId)));
+}
+function currentLeague(userId){
+  const d=loadData();
+  const available=d.leagues.filter(l=>Array.isArray(l.members)&&l.members.some(id=>sameId(id,userId)));
+  if(!available.length) return null;
+  const preferred=getCurrentLeagueId();
+  const selected=preferred ? available.find(l=>sameId(l.id,preferred)) : null;
+  if(selected) return selected;
+  setCurrentLeagueId(available[0].id);
+  return available[0];
+}
+function selectLeague(userId,leagueId){
+  const d=loadData();
+  const league=d.leagues.find(l=>sameId(l.id,leagueId)&&Array.isArray(l.members)&&l.members.some(id=>sameId(id,userId)));
+  if(!league) throw new Error('Lega non disponibile per questo profilo.');
+  setCurrentLeagueId(league.id);
+  return league;
+}
+function currentTeam(userId,leagueId){return loadData().teams.find(t=>sameId(t.ownerId,userId)&&sameId(t.leagueId,leagueId))||null;}

@@ -1,34 +1,61 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081222"><title>L-STORE FANTA MANAGER · Registrazione</title><link rel="stylesheet" href="css/style.css?v=20260814b"><link rel="stylesheet" href="css/responsive.css?v=20260814b"><link rel="stylesheet" href="css/login.css?v=20260814"></head><body class="auth-page"><div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><main class="auth-card auth-register"><div class="auth-brand"><img src="assets/logo/lstore-logo.png" class="auth-logo" alt="L-Store"><span>L-STORE FANTA MANAGER</span></div><p class="eyebrow">CREATE YOUR TEAM</p><h1>Inizia da qui.</h1><p class="muted">Crea il tuo profilo e preparati all'asta.</p><form id="regForm" novalidate><label>Nome<input id="name" name="name" autocomplete="name" required></label><label>Email<input type="email" id="email" name="email" autocomplete="email" required></label><label>Password<input type="password" id="password" name="password" autocomplete="new-password" minlength="6" required></label><label>Conferma password<input type="password" id="confirm" name="confirm" autocomplete="new-password" minlength="6" required></label><div class="password-match" id="matchHint">Inserisci una password di almeno 6 caratteri.</div><div class="form-error" id="error" aria-live="polite"></div><button class="btn primary full" type="submit">CREA PROFILO</button></form><p class="note">Frontend-only: i dati restano nel browser di questo dispositivo.</p><a class="back" href="login.html">← Hai già un account?</a></main><script src="js/storage.js"></script><script src="js/auth.js"></script><script>
-const form = document.getElementById('regForm');
-const passwordInput = document.getElementById('password');
-const confirmInput = document.getElementById('confirm');
-const errorBox = document.getElementById('error');
-const matchHint = document.getElementById('matchHint');
-function updatePasswordState(){
-  const a = passwordInput.value;
-  const b = confirmInput.value;
-  if(!a && !b){ matchHint.textContent='Inserisci una password di almeno 6 caratteri.'; matchHint.className='password-match'; return; }
-  if(b && a === b){ matchHint.textContent='✓ Le password coincidono'; matchHint.className='password-match ok'; return; }
-  matchHint.textContent='Le password devono essere identiche.'; matchHint.className='password-match bad';
-}
-passwordInput.addEventListener('input', updatePasswordState);
-confirmInput.addEventListener('input', updatePasswordState);
-form.addEventListener('submit', async (event)=>{
-  event.preventDefault();
-  errorBox.textContent='';
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const password = passwordInput.value;
-  const confirm = confirmInput.value;
-  if(password !== confirm){
-    updatePasswordState();
-    confirmInput.focus();
-    errorBox.textContent='Le password inserite sono diverse. Controlla i due campi.';
-    return;
-  }
-  try{
-    await registerUser(name,email,password,confirm);
-    location.href='scelta-lega.html';
-  }catch(error){ errorBox.textContent=error.message; }
-});
-</script></body></html>
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#081222">
+  <title>L-STORE FANTA MANAGER · Registrazione</title>
+  <link rel="stylesheet" href="css/style.css?v=20260816b">
+  <link rel="stylesheet" href="css/responsive.css?v=20260816b">
+  <link rel="stylesheet" href="css/login.css?v=20260816b">
+</head>
+<body class="auth-page auth-switch-page" data-auth-mode="register">
+  <div class="ambient ambient-a"></div><div class="ambient ambient-c"></div>
+  <main class="auth-switcher" data-auth-switcher>
+    <section class="auth-form-panel login-panel" aria-label="Accesso">
+      <div class="auth-brand"><img src="assets/logo/lstore-logo.png" class="auth-logo" alt="L-Store"><span>L-STORE FANTA MANAGER</span></div>
+      <p class="eyebrow">WELCOME BACK</p><h1>Bentornato.</h1><p class="muted">Rientra nella tua lega e continua l’asta.</p>
+      <form id="loginForm" novalidate>
+        <label>Email<input type="email" id="login-email" autocomplete="email" required></label>
+        <label>Password<input type="password" id="login-password" autocomplete="current-password" required></label>
+        <div class="form-error" id="login-error" aria-live="polite"></div>
+        <button class="btn primary full" type="submit">ACCEDI</button>
+        <button type="button" class="link-btn" data-forgot>PASSWORD DIMENTICATA</button>
+      </form>
+      <button class="auth-mobile-switch" type="button" data-show-register>Non hai un account? <b>Registrati</b></button>
+      <a class="back" href="iniziale.html">← Torna alla home</a>
+    </section>
+
+    <section class="auth-form-panel register-panel" aria-label="Registrazione">
+      <div class="auth-brand"><img src="assets/logo/lstore-logo.png" class="auth-logo" alt="L-Store"><span>L-STORE FANTA MANAGER</span></div>
+      <p class="eyebrow">CREATE YOUR TEAM</p><h1>Crea il tuo account.</h1><p class="muted">Un profilo, le tue leghe, tutte le aste.</p>
+      <form id="regForm" novalidate>
+        <div class="auth-two-cols"><label>Nome<input id="reg-name" autocomplete="name" required></label><label>Email<input type="email" id="reg-email" autocomplete="email" required></label></div>
+        <label>Password<input type="password" id="reg-password" autocomplete="new-password" minlength="6" required></label>
+        <div class="strength-card" data-strength-card data-strength="0">
+          <div class="strength-visual" data-strength-visual></div>
+          <div><strong data-strength-title>Nessun lucchetto</strong><span data-strength-copy>La porta è completamente aperta.</span></div>
+        </div>
+        <label>Conferma password<input type="password" id="reg-confirm" autocomplete="new-password" minlength="6" required></label>
+        <div class="password-match" id="matchHint">Ripeti la password per confermarla.</div>
+        <div class="form-error" id="reg-error" aria-live="polite"></div>
+        <button class="btn primary full" type="submit">CREA PROFILO</button>
+      </form>
+      <button class="auth-mobile-switch" type="button" data-show-login>Hai già un account? <b>Accedi</b></button>
+    </section>
+
+    <aside class="auth-slide-panel" aria-hidden="true">
+      <div class="slide-copy slide-new">
+        <div class="slide-icon">✦</div><h2>Nuovo qui?</h2><p>Crea il profilo e prepara la tua squadra per la prossima asta.</p>
+        <button class="slide-btn" type="button" data-show-register>REGISTRATI</button>
+      </div>
+      <div class="slide-copy slide-back">
+        <div class="slide-icon">↩</div><h2>Hai già un account?</h2><p>Torna alla tua lega, ai crediti e alla rosa senza ricominciare.</p>
+        <button class="slide-btn" type="button" data-show-login>ACCEDI</button>
+      </div>
+    </aside>
+  </main>
+  <p class="auth-local-note">I dati di questa versione restano nel browser del dispositivo.</p>
+  <script src="js/storage.js?v=20260816b"></script><script src="js/auth.js?v=20260816b"></script><script src="js/auth-ui.js?v=20260816b"></script>
+</body>
+</html>

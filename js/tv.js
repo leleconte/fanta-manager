@@ -5,8 +5,8 @@ function tvRender() {
   if (!league) return;
   const data = loadData();
   const auction = getActiveAuction(league.id);
-  const player = auction ? data.players.find(x => x.id === auction.playerId) : null;
-  const teams = data.teams.filter(x => x.leagueId === league.id);
+  const player = auction ? data.players.find(x => sameId(x.id, auction.playerId)) : null;
+  const teams = data.teams.filter(x => sameId(x.leagueId, league.id));
 
   const name = document.querySelector('[data-tv-name]');
   const meta = document.querySelector('[data-tv-team]');
@@ -19,11 +19,11 @@ function tvRender() {
   if (name) name.textContent = player?.name || 'NESSUN GIOCATORE';
   if (meta) meta.textContent = player ? `${player.team} · ${player.role}` : 'ASTA PRONTA';
   if (price) price.textContent = String(auction?.currentPrice ?? 0);
-  if (bidder) bidder.textContent = auction?.bestTeamId ? (teams.find(x => x.id === auction.bestTeamId)?.name || '—') : 'NESSUNA OFFERTA';
-  if (timer) timer.textContent = auction ? Math.max(0, Math.ceil((Number(auction.endsAt) - Date.now()) / 1000)).toString().padStart(2, '0') : '—';
-  if (teamList) teamList.innerHTML = teams.map(x => `<div class="tv-team ${auction?.bestTeamId === x.id ? 'is-leading' : ''}"><span class="team-mark">${escapeHtml(x.abbr || String(x.name || '').slice(0,3).toUpperCase())}</span><strong>${escapeHtml(x.name)}</strong><b>${Number(x.credits || 0)}</b></div>`).join('') || '<div class="empty">Nessuna squadra.</div>';
+  if (bidder) bidder.textContent = auction?.bestTeamId ? (teams.find(x => sameId(x.id, auction.bestTeamId))?.name || '—') : 'NESSUNA OFFERTA';
+  if (timer) timer.textContent = auctionTimerText(auction);
+  if (teamList) teamList.innerHTML = teams.map(x => `<div class="tv-team ${auction?.bestTeamId && sameId(auction.bestTeamId, x.id) ? 'is-leading' : ''}"><span class="team-mark">${escapeHtml(x.abbr || String(x.name || '').slice(0,3).toUpperCase())}</span><strong>${escapeHtml(x.name)}</strong><b>${Number(x.credits || 0)}</b></div>`).join('') || '<div class="empty">Nessuna squadra.</div>';
   if (history) history.innerHTML = (auction?.history || []).slice(-6).reverse().map(h => {
-    const tm = teams.find(x => x.id === h.teamId);
+    const tm = teams.find(x => sameId(x.id, h.teamId));
     return `<span>${escapeHtml(tm?.name || 'Squadra')} · ${Number(h.amount || 0)} CR</span>`;
   }).join('') || '—';
 }

@@ -1,1 +1,95 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>L-STORE FANTA MANAGER · Asta</title><link rel="stylesheet" href="css/style.css?v=20260814c"><link rel="stylesheet" href="css/responsive.css?v=20260814c"><link rel="stylesheet" href="css/asta.css?v=20260814c"></head><body><div data-shell><main class="page auction-page"><div class="auction-top"><div><p class="eyebrow">GESTIONE ASTA</p><h1 data-auction-state>PRONTO PER L’ASTA</h1></div><div class="turn-banner">È IL TURNO DI: <strong data-turn>—</strong></div></div><div class="auction-layout"><section class="panel auction-main"><div class="auction-toolbar"><div><label class="toolbar-label" for="player-select">SCEGLI IL GIOCATORE</label><select id="player-select" data-player-select aria-label="Seleziona giocatore"></select></div><span class="auction-badge">ASTA LOCALE</span></div><div class="auction-message" data-auction-message aria-live="polite"></div><div class="player-stage"><div class="big-avatar">⚽</div><p class="eyebrow">GIOCATORE</p><h2 data-player-name>Seleziona un giocatore</h2><p data-player-meta class="muted">—</p><div class="price"> <span data-price>0</span> <small>CR</small></div><div class="bidder">Miglior offerente: <strong data-bidder>—</strong></div><div class="timer" data-timer>—</div></div><div class="bid-grid"><button data-bid="1">+1</button><button data-bid="5">+5</button><button data-bid="10">+10</button><button data-bid="20">+20</button><button data-bid="50">+50</button><button data-bid="100">+100</button></div><div class="auction-actions"><button class="btn primary" data-start>INIZIA ASTA</button><button class="btn" data-pause>PAUSA</button><button class="btn" data-resume>RIPRENDI</button><button class="btn" data-confirm>CONFERMA ACQUISTO</button><button class="btn danger" data-cancel>ANNULLA ASTA</button></div></section><aside class="auction-side"><div class="panel"><div class="section-head"><h2>Partecipanti</h2><span class="live-dot">ASTA</span></div><div data-teams></div></div><div class="panel"><div class="section-head"><h2>Ultimi rilanci</h2></div><div data-history></div></div></aside></div></main></div><script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/giocatori.js"></script><script src="js/asta.js"></script><script src="js/app.js"></script></body></html>
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#081222">
+  <title>L-STORE FANTA MANAGER · Asta</title>
+  <link rel="stylesheet" href="css/style.css?v=20260816b">
+  <link rel="stylesheet" href="css/responsive.css?v=20260816b">
+  <link rel="stylesheet" href="css/asta.css?v=20260816b">
+</head>
+<body>
+<div data-shell>
+  <main class="page auction-page">
+    <div class="auction-top">
+      <div>
+        <p class="eyebrow">GESTIONE ASTA</p>
+        <h1 data-auction-state>PRONTO PER L’ASTA</h1>
+        <p class="auction-sub" data-catalog-status>Caricamento database giocatori…</p>
+      </div>
+      <div class="turn-banner"><span>È IL TURNO DI</span><strong data-turn>—</strong></div>
+    </div>
+
+    <div class="auction-layout">
+      <section class="panel auction-main">
+        <div class="auction-toolbar">
+          <div class="auction-search-wrap">
+            <label class="toolbar-label" for="player-search">CERCA IL GIOCATORE</label>
+            <div class="smart-search auction-smart-search" data-smart-search data-search-box>
+              <button class="smart-search-trigger" type="button" data-smart-search-trigger aria-label="Apri ricerca">
+                <span aria-hidden="true">⌕</span>
+              </button>
+              <div class="smart-search-field">
+                <span class="smart-search-icon" aria-hidden="true">⌕</span>
+                <input id="player-search" data-player-search type="search" autocomplete="off" placeholder="Scrivi nome, squadra, ruolo…" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="player-results">
+                <button class="smart-search-clear" type="button" data-search-clear aria-label="Cancella ricerca">×</button>
+              </div>
+              <input type="hidden" data-player-selected>
+            </div>
+            <div id="player-results" class="player-search-results" data-player-results role="listbox" hidden></div>
+          </div>
+          <div class="auction-toolbar-actions">
+            <span class="auction-badge">ASTA LOCALE</span>
+            <button class="btn compact" type="button" data-refresh-players>AGGIORNA GIOCATORI</button>
+          </div>
+        </div>
+
+        <div class="auction-message" data-auction-message aria-live="polite"></div>
+
+        <div class="player-stage">
+          <div class="big-avatar" data-player-avatar><span>⚽</span></div>
+          <p class="eyebrow">GIOCATORE</p>
+          <h2 data-player-name>Seleziona un giocatore</h2>
+          <p data-player-meta class="muted">—</p>
+          <div class="price"><span data-price>0</span> <small>CR</small></div>
+          <div class="bidder">Miglior offerente: <strong data-bidder>—</strong></div>
+          <div class="timer-label">TEMPO</div>
+          <div class="timer" data-timer>—</div>
+          <div class="single-note" data-single-note></div>
+        </div>
+
+        <div class="bid-grid">
+          <button type="button" data-bid="1">+1</button><button type="button" data-bid="5">+5</button><button type="button" data-bid="10">+10</button>
+          <button type="button" data-bid="20">+20</button><button type="button" data-bid="50">+50</button><button type="button" data-bid="100">+100</button>
+        </div>
+
+        <div class="auction-actions">
+          <button class="btn primary start-auction-btn" type="button" data-start>
+            <span class="start-route" aria-hidden="true"></span>
+            <span class="start-runner" aria-hidden="true">⚽</span>
+            <span class="start-check" aria-hidden="true">✓</span>
+            <span class="start-label" data-start-label>INIZIA ASTA</span>
+          </button>
+          <button class="btn" type="button" data-pause>PAUSA</button>
+          <button class="btn" type="button" data-resume>RIPRENDI</button>
+          <button class="btn" type="button" data-pass>PASSA TURNO</button>
+          <button class="btn" type="button" data-confirm>CONFERMA ACQUISTO</button>
+          <button class="btn danger" type="button" data-cancel>ANNULLA ASTA</button>
+        </div>
+      </section>
+
+      <aside class="auction-side">
+        <div class="panel"><div class="section-head"><h2>Partecipanti</h2><span class="live-dot">ASTA</span></div><div data-teams></div></div>
+        <div class="panel"><div class="section-head"><h2>Ultimi rilanci</h2></div><div data-history></div></div>
+      </aside>
+    </div>
+  </main>
+</div>
+<script src="js/storage.js?v=20260816b"></script>
+<script src="js/auth.js?v=20260816b"></script>
+<script src="js/giocatori.js?v=20260816b"></script>
+<script src="js/asta.js?v=20260816b"></script>
+<script src="js/app.js?v=20260816b"></script>
+</body>
+</html>
